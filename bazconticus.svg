@@ -1,0 +1,93 @@
+<svg width="100vmax" height="100vmin"
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink">
+  
+  <style>
+    <![CDATA[
+      * {
+        margin: 0;
+      }
+      svg {
+        display: block;
+        width: 100vmax;
+        height: 100vmin;
+      }
+    ]]>
+  </style>
+
+  <defs>
+    <filter id="light">
+      <feImage result="roughMap" xlink:href="roug.jpg"></feImage>
+      <feImage result="displMap" xlink:href="disp.jpg"></feImage>
+      <feImage result="metalMap" xlink:href="meta.jpg"></feImage>
+      
+      <feColorMatrix in="roughMap" type="luminanceToAlpha" result="roughMapAlpha"></feColorMatrix>
+      <feColorMatrix in="displMap" type="luminanceToAlpha" result="displMapAlpha"></feColorMatrix>
+      <feColorMatrix in="metalMap" type="luminanceToAlpha" result="metalMapAlpha"></feColorMatrix>
+      
+      <feDiffuseLighting in="roughMapAlpha" surfaceScale="1" result="roughLighting">
+        <fePointLight id="pointLight1" x="800" y="130" z="50"></fePointLight>
+      </feDiffuseLighting>
+    
+      <feDiffuseLighting in="displMapAlpha" surfaceScale="3" result="displLighting">
+        <fePointLight id="pointLight2" x="800" y="130" z="250"></fePointLight>
+      </feDiffuseLighting>
+      
+      <feDiffuseLighting in="metalMapAlpha" surfaceScale="2" result="metalLighting">
+        <fePointLight id="pointLight3" x="800" y="130" z="90"></fePointLight>
+      </feDiffuseLighting>
+
+      <feComposite in="roughLighting" in2="SourceGraphic" operator="arithmetic" k1="1" k2="0" k3="0" k4="0" result="roughComposite"></feComposite>
+      <feComposite in="displLighting" in2="roughComposite" operator="arithmetic" k1="2" k2="0" k3="0" k4="0" result="displComposite"></feComposite>
+      <feComposite in="metalLighting" in2="displComposite" operator="arithmetic" k1="1.7" k2="0" k3="0" k4="0"></feComposite>
+    </filter>
+    
+    <pattern id="pattern1" width="100vmax" height="100vmin" patternUnits="userSpaceOnUse">
+      <image xlink:href="text.jpg" width="100vmax" height="100vmin"></image>
+    </pattern>
+  </defs>
+  
+  <rect width="100%" height="100%" fill="url(#pattern1)" filter="url(#light)"></rect>
+
+  <script type="application/ecmascript">
+    <![CDATA[
+      let targetX = 800;
+      let targetY = 130;
+      const easing = 0.15;
+
+      function updateLightPosition() {
+        const pointLight1 = document.getElementById('pointLight1');
+        const pointLight2 = document.getElementById('pointLight2');
+        const pointLight3 = document.getElementById('pointLight3');
+
+        let currentX1 = parseFloat(pointLight1.getAttribute('x'));
+        let currentY1 = parseFloat(pointLight1.getAttribute('y'));
+        let currentX2 = parseFloat(pointLight2.getAttribute('x'));
+        let currentY2 = parseFloat(pointLight2.getAttribute('y'));
+        let currentX3 = parseFloat(pointLight3.getAttribute('x'));
+        let currentY3 = parseFloat(pointLight3.getAttribute('y'));
+
+        // Ease towards the target position
+        pointLight1.setAttribute('x', currentX1 + (targetX - currentX1) * easing);
+        pointLight1.setAttribute('y', currentY1 + (targetY - currentY1) * easing);
+
+        pointLight2.setAttribute('x', currentX2 + (targetX - currentX2) * easing);
+        pointLight2.setAttribute('y', currentY2 + (targetY - currentY2) * easing);
+
+        pointLight3.setAttribute('x', currentX3 + (targetX - currentX3) * easing);
+        pointLight3.setAttribute('y', currentY3 + (targetY - currentY3) * easing);
+
+        requestAnimationFrame(updateLightPosition);
+      }
+
+      document.addEventListener('click', (e) => {
+        const svg = document.querySelector('svg');
+        const rect = svg.getBoundingClientRect();
+        targetX = e.clientX - rect.left;
+        targetY = e.clientY - rect.top;
+      });
+
+      updateLightPosition(); // Start the animation loop
+    ]]>
+  </script>
+</svg>
